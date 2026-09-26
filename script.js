@@ -1,6 +1,6 @@
 // ===== CONFIGURACIÓN PRINCIPAL =====
-const WEDDING_DATE = '2027-04-18T16:30:00-05:00';
-const WHATSAPP_NUMBER = '51999999999'; // Reemplaza por el número real, con código de país y sin +
+const WEDDING_DATE = '2027-01-30T03:00:00-05:00';
+const WHATSAPP_NUMBER = '51979722223'; // Reemplaza por el número real, con código de país y sin +
 
 // Cuenta regresiva
 const target = new Date(WEDDING_DATE).getTime();
