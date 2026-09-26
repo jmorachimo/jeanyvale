@@ -1,8 +1,11 @@
 // ===== CONFIGURACIÓN PRINCIPAL =====
-const WEDDING_DATE = '2027-01-30T15:00:00-05:00';
-const WHATSAPP_NUMBER = '51979722223'; // Perú: 51 + número, sin + ni espacios
+
+const WEDDING_DATE = '2027-01-30T16:00:00-05:00';
+const WHATSAPP_NUMBER = '51979722223';
+
 
 // ===== CUENTA REGRESIVA =====
+
 const target = new Date(WEDDING_DATE).getTime();
 const ids = ['days', 'hours', 'minutes', 'seconds'];
 
@@ -18,6 +21,7 @@ function updateCountdown() {
 
   ids.forEach((id, i) => {
     const element = document.getElementById(id);
+
     if (element) {
       element.textContent = values[i];
     }
@@ -28,30 +32,41 @@ updateCountdown();
 setInterval(updateCountdown, 1000);
 
 
-// ===== ANIMACIÓN SUAVE =====
-const observer = new IntersectionObserver((entries) => {
-  entries.forEach((entry) => {
-    if (entry.isIntersecting) {
-      entry.target.classList.add('visible');
-    }
-  });
-}, {
-  threshold: 0.12
-});
+// ===== ANIMACIÓN AL HACER SCROLL =====
 
-document.querySelectorAll('.reveal').forEach((el) => {
-  observer.observe(el);
-});
+if ('IntersectionObserver' in window) {
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    },
+    {
+      threshold: 0.12
+    }
+  );
+
+  document.querySelectorAll('.reveal').forEach((element) => {
+    observer.observe(element);
+  });
+} else {
+  document.querySelectorAll('.reveal').forEach((element) => {
+    element.classList.add('visible');
+  });
+}
 
 
 // ===== RSVP POR WHATSAPP =====
+
 const form = document.getElementById('rsvpForm');
 const status = document.getElementById('formStatus');
 
-if (form && status) {
-
-  form.addEventListener('submit', (e) => {
-    e.preventDefault();
+if (form) {
+  form.addEventListener('submit', function (event) {
+    event.preventDefault();
 
     const data = new FormData(form);
 
@@ -59,41 +74,53 @@ if (form && status) {
     const attendance = String(data.get('attendance') || '').trim();
     const message = String(data.get('message') || '').trim();
 
-    if (!name || !attendance) {
-      status.textContent =
-        'Completa tu nombre y confirma si asistirás.';
+    if (!name) {
+      if (status) {
+        status.textContent = 'Por favor, ingresa tu nombre.';
+      }
       return;
     }
 
-    let text =
-`Hola 👋
+    if (!attendance) {
+      if (status) {
+        status.textContent = 'Por favor, confirma si asistirás.';
+      }
+      return;
+    }
+
+    let text = `Hola,
 
 Soy ${name}.
 
-💍 Confirmación de asistencia:
+Confirmación de asistencia:
 ${attendance}`;
 
     if (message) {
       text += `
 
-💌 Mensaje para los novios:
+Mensaje para los novios:
 ${message}`;
     }
 
     text += `
 
-¡Gracias! 🤍`;
+Muchas gracias.`;
 
     const whatsappURL =
       `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(text)}`;
 
-    status.textContent = 'Abriendo WhatsApp…';
+    if (status) {
+      status.textContent = 'Abriendo WhatsApp...';
+    }
 
-    window.open(
+    const whatsappWindow = window.open(
       whatsappURL,
       '_blank',
       'noopener,noreferrer'
     );
-  });
 
+    if (!whatsappWindow) {
+      window.location.href = whatsappURL;
+    }
+  });
 }
